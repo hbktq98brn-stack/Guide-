@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Уровни погружения в ИИ 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg: #F7F9FC;
+  --paper: #FFFFFF;
+  --ink: #111418;
+  --ink-2: #4A525E;
+  --ink-3: #8892A0;
+  --line: #E2E8F0;
+  
+  --blue: #0044FF;
+  --blue-light: #E5EDFF;
+  
+  --orange: #FF4B2B;
+  --orange-light: #FFECE8;
+  
+  --green: #00D285;
+  --green-light: #E0F9EF;
+
+  --shadow-sm: 0 4px 12px rgba(17, 20, 24, 0.04);
+  --shadow-md: 0 12px 32px rgba(17, 20, 24, 0.08);
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  background: #E2E8F0; /* Darker background outside pages */
+  color: var(--ink);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* DOCUMENT */
+.document{
+  width: 210mm;
+  margin: 0 auto;
+  padding: 40px 0 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+}
+
+/* PAGE (Square Format) */
+.page{
+  width: 210mm;
+  height: 210mm;
+  min-width: 210mm;
+  max-width: 210mm;
+  min-height: 210mm;
+  max-height: 210mm;
+  background: var(--bg);
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  padding: 15mm 15mm;
+  box-sizing: border-box;
+  page-break-after: always;
+  break-after: page;
+  page-break-inside: avoid;
+  break-inside: avoid;
+  display: flex;
+  flex-direction: column;
+  
+  /* Subtle grid background for progressive tech feel */
+  background-image: 
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 20mm 20mm;
+  background-position: center top;
+}
+
+/* COVER (PAGE 1) */
+.page--cover {
+  background-color: var(--paper);
+  background-image: none;
+}
+
+/* TYPOGRAPHY */
+.h-main {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 44px;
+  line-height: 1.05;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+
+.h-sub {
+  font-family: 'Space Mono', monospace;
+  font-size: 14px;
+  color: var(--ink-2);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+  margin-bottom: 40px;
+}
+
+.year-badge {
+  position: absolute;
+  top: 15mm;
+  right: 15mm;
+  font-family: 'Syne', sans-serif;
+  font-size: 44px;
+  font-weight: 800;
+  color: var(--blue);
+  line-height: 1;
+}
+
+/* TIMELINE VISUALIZATION */
+.timeline-container {
+  position: relative;
+  flex: 1;
+  width: 100%;
+}
+
+/* SVG Path */
+.path-svg {
+  position: absolute;
+  top: 0;
+  left: 40px;
+  width: 60px;
+  height: 100%;
+  z-index: 1;
+  overflow: visible;
+}
+
+.path-line {
+  fill: none;
+  stroke: var(--blue);
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+
+.path-line--transition {
+  stroke: var(--orange);
+  stroke-dasharray: 8 8;
+}
+
+.path-line--advanced {
+  stroke: var(--green);
+}
+
+/* Nodes */
+.node {
+  position: absolute;
+  left: 70px; /* Matches SVG center */
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--paper);
+  border: 4px solid var(--blue);
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  box-shadow: 0 0 0 4px var(--blue-light);
+}
+
+.node--transition { border-color: var(--orange); box-shadow: 0 0 0 4px var(--orange-light); }
+.node--advanced { border-color: var(--green); box-shadow: 0 0 0 4px var(--green-light); }
+
+/* Connector (Dotted line from node to card) */
+.connector {
+  position: absolute;
+  left: 80px;
+  height: 2px;
+  border-top: 2px dashed var(--line);
+  z-index: 1;
+  width: 30px;
+}
+
+/* Level Cards */
+.level-card {
+  position: absolute;
+  left: 125px;
+  right: 0;
+  background: var(--paper);
+  border-radius: 12px;
+  padding: 20px 24px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--line);
+  z-index: 3;
+}
+
+.level-card--blue { border-left: 4px solid var(--blue); }
+.level-card--orange { border-left: 4px solid var(--orange); }
+.level-card--green { border-left: 4px solid var(--green); }
+
+.level-meta {
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--blue);
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.level-card--orange .level-meta { color: var(--orange); }
+.level-card--green .level-meta { color: var(--green); }
+
+.level-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 1.2;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  color: var(--ink);
+}
+
+.level-desc {
+  font-size: 12.5px;
+  color: var(--ink-2);
+  line-height: 1.55;
+  margin-bottom: 8px;
+}
+
+.level-note {
+  font-size: 11.5px;
+  color: var(--ink-3);
+  font-style: italic;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+}
+
+/* TRANSITION BLOCK */
+.transition-block {
+  position: absolute;
+  left: 0;
+  right: 0;
+  background: var(--orange);
+  color: var(--paper);
+  padding: 16px 24px;
+  border-radius: 12px;
+  z-index: 4;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow: hidden;
+}
+
+.transition-block::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  right: -10%;
+  width: 100px;
+  height: 200%;
+  background: rgba(255,255,255,0.1);
+  transform: rotate(30deg);
+}
+
+.transition-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 22px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.transition-desc {
+  font-size: 13px;
+  font-weight: 500;
+  max-width: 85%;
+}
+
+/* POSITIONING SPECIFICS */
+/* Page 1 */
+.p1-node-1 { top: 5%; }
+.p1-card-1 { top: calc(5% - 20px); }
+.p1-node-2 { top: 55%; }
+.p1-card-2 { top: calc(55% - 20px); }
+
+/* Page 2 */
+.p2-node-3 { top: 5%; }
+.p2-card-3 { top: calc(5% - 20px); }
+.p2-transition { top: 50%; }
+.p2-node-4 { top: 75%; }
+
+/* Page 3 */
+.p3-node-4 { top: 5%; }
+.p3-card-4 { top: calc(5% - 20px); }
+.p3-node-5 { top: 55%; }
+.p3-card-5 { top: calc(55% - 20px); }
+
+/* Page 4 */
+.p4-node-6 { top: 5%; }
+.p4-card-6 { top: calc(5% - 20px); }
+.p4-node-7 { top: 55%; }
+.p4-card-7 { top: calc(55% - 20px); }
+
+
+/* PRINT SETTINGS */
+@page {
+  size: 210mm 210mm;
+  margin: 0;
+}
+
+@media print {
+  body {
+    background: var(--paper);
+    margin: 0;
+    padding: 0;
+  }
+  .document {
+    padding: 0;
+    gap: 0;
+  }
+  .page {
+    box-shadow: none;
+    margin: 0;
+    page-break-after: always;
+    break-after: page;
+  }
+  .page:last-child {
+    page-break-after: auto;
+    break-after: auto;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="document">
+
+  <!-- PAGE 1 -->
+  <section class="page page--cover">
+    <div class="h-main">Уровни<br>погружения в ИИ</div>
+    <div class="h-sub">Проверьте себя, на каком вы этапе</div>
+    <div class="year-badge">2026</div>
+
+    <div class="timeline-container">
+      <!-- SVG Path (Curve) -->
+      <svg class="path-svg" preserveAspectRatio="none">
+        <path class="path-line" d="M 30 0 C 30 30, 0 60, 30 100" />
+      </svg>
+
+      <!-- Node 01 -->
+      <div class="connector" style="top: 5%; left: 80px;"></div>
+      <div class="node p1-node-1"></div>
+      <div class="level-card level-card--blue p1-card-1">
+        <div class="level-meta">+ 01</div>
+        <div class="level-title">Собеседник и поисковик</div>
+        <div class="level-desc">
+          Один ИИ в одном приложении: с ним болтают и ищут, как в поисковике. Часто голосом.
+        </div>
+        <div class="level-note">
+          Потом выясняется, что для каждой задачи есть свой ИИ-сервис.
+        </div>
+      </div>
+
+      <!-- Node 02 -->
+      <div class="connector" style="top: 55%; left: 80px;"></div>
+      <div class="node p1-node-2"></div>
+      <div class="level-card level-card--blue p1-card-2">
+        <div class="level-meta">+ 02</div>
+        <div class="level-title">Коллекция приложений</div>
+        <div class="level-desc">
+          Под каждую задачу свой ИИ-сервис. Подписки множатся, с ними копится опыт. Именно таким людям продают Dots, бота Grok, сервис Higgsfield — и прочие френдли-интерфейсы.
+        </div>
+        <div class="level-note">
+          В этот момент пользователю надоедает каждый раз объяснять ИИ, кто он, что и как делает. Хочется научить его один раз и навсегда.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAGE 2 -->
+  <section class="page">
+    <div class="timeline-container">
+      <!-- SVG Path (Curve to straight) -->
+      <svg class="path-svg" preserveAspectRatio="none">
+        <path class="path-line" d="M 30 0 C 60 20, 60 50, 30 80" />
+        <path class="path-line path-line--transition" d="M 30 80 L 30 100" />
+      </svg>
+
+      <!-- Node 03 -->
+      <div class="connector" style="top: 5%; left: 80px;"></div>
+      <div class="node p2-node-3"></div>
+      <div class="level-card level-card--blue p2-card-3">
+        <div class="level-meta">+ 03</div>
+        <div class="level-title">Скиллы</div>
+        <div class="level-desc">
+          Скилл — инструкция, которая учит ИИ делать работу по-твоему. Их обожают, переиспользуют и каждую неделю качают новые. Про это снимают рилзы и выкладывают «Топ-10 моих любимых скиллов».
+        </div>
+      </div>
+
+      <!-- Transition Block -->
+      <div class="transition-block p2-transition">
+        <div class="transition-title">Великий переход</div>
+        <div class="transition-desc">
+          От запроса пользователь переходит к поручениям. Теперь ИИ часто делает сам, ему не требуется постоянный контроль.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAGE 3 -->
+  <section class="page">
+    <div class="timeline-container">
+      <!-- SVG Path (New advanced stage) -->
+      <svg class="path-svg" preserveAspectRatio="none">
+        <path class="path-line path-line--advanced" d="M 30 0 C 0 40, 60 60, 30 100" />
+      </svg>
+
+      <!-- Node 04 -->
+      <div class="connector" style="top: 5%; left: 80px;"></div>
+      <div class="node node--advanced p3-node-4"></div>
+      <div class="level-card level-card--green p3-card-4">
+        <div class="level-meta">+ 04</div>
+        <div class="level-title">Агенты и пайплайны</div>
+        <div class="level-desc">
+          Человек начинает поручать: собирает первые пайплайны, где агенты шаг за шагом делают его работу. Логичное продолжение скиллов.
+        </div>
+        <div class="level-note">
+          Здесь первый микропродукт, собранный с ИИ (лендинг, дашборд) и первое подключение ИИ к другим сервисам через MCP.
+        </div>
+      </div>
+
+      <!-- Node 05 -->
+      <div class="connector" style="top: 55%; left: 80px;"></div>
+      <div class="node node--advanced p3-node-5"></div>
+      <div class="level-card level-card--green p3-card-5">
+        <div class="level-meta">+ 05</div>
+        <div class="level-title">Харнесс</div>
+        <div class="level-desc">
+          ИИ становится операционной системой: память, правила, агенты и сервисы собраны в одном месте. Это уже серьёзно. Приложений остаётся одно-два.
+        </div>
+        <div class="level-note">
+          Возвращается голос: с ИИ говорят весь день, и надиктовывать проще, чем печатать.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAGE 4 -->
+  <section class="page">
+    <div class="timeline-container">
+      <!-- SVG Path (Final stage) -->
+      <svg class="path-svg" preserveAspectRatio="none">
+        <path class="path-line path-line--advanced" d="M 30 0 C 60 30, 10 70, 30 100" />
+      </svg>
+
+      <!-- Node 06 -->
+      <div class="connector" style="top: 5%; left: 80px;"></div>
+      <div class="node node--advanced p4-node-6"></div>
+      <div class="level-card level-card--green p4-card-6">
+        <div class="level-meta">+ 06</div>
+        <div class="level-title">Работает всегда</div>
+        <div class="level-desc">
+          ИИ живет на отдельном сервере или домашнем компьютере, который не выключается. Работа идёт, даже когда человек спит.
+        </div>
+      </div>
+
+      <!-- Node 07 -->
+      <div class="connector" style="top: 55%; left: 80px;"></div>
+      <div class="node node--advanced p4-node-7"></div>
+      <div class="level-card level-card--green p4-card-7">
+        <div class="level-meta">+ 07</div>
+        <div class="level-title">Улучшает сам себя</div>
+        <div class="level-desc">
+          Харнесс обновляется сам: по итогам работы дописывает себе скиллы и правила. Это передний край.
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+</body>
+</html>
